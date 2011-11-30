@@ -58,23 +58,30 @@ class Lock
 
 class Event
 {
-  friend class Synchro;
 
-  private:
+public:
     Event(std::string name);
     Event(std::string name, boost::shared_ptr<pthread_mutex_t> mutex);
-  public:
     virtual ~Event();
 
-  public:
+    // Makes thread await for signal() to be called on this event
+    // Or if signalled is true, then the thread will continue without
+    // waiting for a signal
+    // Note : that holds true only for the first thread calling await,
+    // since await sets signalled to false afterwards
     void await();
-    bool poll();
+    // Signals threads waiting on this event to resume
+    // It also sets signalled to true, so that if a thread starts waiting
+    // on the event after it's been signalled, it doesn't get stuck on it
+    // until the next signal (which may never come)
+    // Note : that holds true only for the first thread calling await,
+    // since await sets signalled to false afterwards
     void signal();
 
-  public:
+public:
     const std::string name;
 
-  private:
+private:
     boost::shared_ptr<pthread_mutex_t> mutex;
     pthread_cond_t cond;
     bool signalled;
@@ -126,8 +133,7 @@ class Trigger
   : public TriggeredEvent
 {
   public:
-    Trigger(boost::shared_ptr<Synchro> _synchro, std::string name,
-            bool _value=false);
+    Trigger(std::string name, bool _value=false);
     virtual ~Trigger() { }
 
     void flip();
@@ -145,43 +151,46 @@ class Trigger
 
   private:
     boost::shared_ptr<pthread_mutex_t> mutex;
-    boost::shared_ptr<Event> on_event;
-    boost::shared_ptr<Event> off_event;
-    boost::shared_ptr<Event> flip_event;
+    Event on_event;
+    Event off_event;
+    Event flip_event;
     bool value;
 };
 
-class Thread
-{
-  public:
-    Thread(boost::shared_ptr<Synchro> _synchro, std::string _name);
+class Thread {
+
+public:
+    Thread(std::string _name);
     virtual ~Thread();
 
-  public:
+public:
     // To start and stop the thread.  Thread may be run repeatedly, but make
     // sure the thread has stopped before starting it once more.
     virtual int start();
     virtual void stop();
 
+    void signalToResume();
+    void waitForThreadToFinish();
+
     // Overload this method to run your thread code
     virtual void run() = 0;
 
-    // These are/should only fired once!  be careful, or deadlock could ensue
-    const boost::shared_ptr<TriggeredEvent> getTrigger() const{ return trigger;}
+protected:
+    void waitForSignal();
 
-  private:
+private:
     static void* runThread(void* _thread);
 
-  public:
+public:
     const std::string name;
 
-  private:
+private:
     pthread_t thread;
 
-  protected:
-    boost::shared_ptr<Synchro> synchro;
+protected:
     bool running;
     boost::shared_ptr<Trigger> trigger;
+    Event signal;
 };
 
 #endif // Synchro_h_DEFINED

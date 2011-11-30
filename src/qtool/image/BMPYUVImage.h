@@ -31,15 +31,15 @@ class BMPYUVImage : public YUVImage
 {
 
 public:
-    BMPYUVImage(man::memory::RoboImage::const_ptr _roboImage);
+    BMPYUVImage(man::memory::MImage::const_ptr rawImage);
     virtual ~BMPYUVImage() {};
-    virtual void updateFromRoboImage();
+    virtual void updateFromRawImage();
     void updateBitmap();
 
     BitmapType getCurrentBitmapType() const { return bitmapType; }
     void setBitmapType(BitmapType type) { bitmapType = type; updateBitmap();}
 
-    QImage getBitmap(BitmapType type = Color) const { return bitmap; }
+    QImage getBitmap() const { return bitmap; }
 
 
 private:

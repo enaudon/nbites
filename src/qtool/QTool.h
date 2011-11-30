@@ -15,6 +15,8 @@
 #include "data/DataManager.h"
 #include "colorcreator/ColorCreator.h"
 #include "viewer/LogViewer.h"
+#include "viewer/BallEKFViewer.h"
+#include "viewer/FieldViewer.h"
 
 namespace qtool {
 
@@ -26,6 +28,10 @@ public:
     QTool();
     ~QTool();
 
+private slots:
+    void next();
+    void prev();
+
 private:
     QTabWidget* toolTabs;
 
@@ -33,6 +39,13 @@ private:
     data::DataLoader* dataLoader;
     colorcreator::ColorCreator* colorCreator;
     viewer::LogViewer* logViewer;
+    viewer::BallEKFViewer* ballEKFViewer;
+    viewer::FieldViewer* fieldViewer;
+    QPushButton* prevButton;
+    QPushButton* nextButton;
+    QToolBar* toolbar;
+
+
 };
 
 }

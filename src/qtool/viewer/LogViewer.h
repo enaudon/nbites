@@ -27,9 +27,9 @@ public:
 	LogViewer(data::DataManager::ptr dataManager);
 
 private:
-	std::vector<QDockWidget*> dockWidget;
-	data::DataManager::ptr dataManager;
-	RoboImageViewer* roboImageViewer;
+    std::vector<QDockWidget*> dockWidget;
+    data::DataManager::ptr dataManager;
+    RoboImageViewer* roboImageViewer;
 
 };
 
